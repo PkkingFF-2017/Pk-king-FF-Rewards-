@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PK King FF Rewards</title>
+
+    <!-- Tailwind CSS & FontAwesome Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- React, ReactDOM, Babel & Canvas Confetti -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; user-select: none; }
+        .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+        const [activeTab, setActiveTab] = useState('home');
+        const [showReferModal, setShowReferModal] = useState(false);
+        const [showAuthModal, setShowAuthModal] = useState(false);
+        const [showAdModal, setShowAdModal] = useState(false);
+        const [adRewardType, setAdRewardType] = useState('coins'); // 'spin' | 'scratch' | 'quiz' | 'coins'
+
+        // User State Initialization
+        const [user, setUser] = useState(() => {
+            const saved = localStorage.getItem('pk_user_profile');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { console.error(e); }
+            }
+            return {
+                id: 'PK_' + Math.floor(100000 + Math.random() * 900000),
+                name: 'FF Warrior',
+                email: 'asharphibharati@gmail.com',
+                avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150',
+                coins: 250,
+                referralCode: 'PKKING99',
+                joinedDate: new Date().toLocaleDateString(),
+                dailyStreak: 1,
+                spinsLeft: 5,
+                scratchesLeft: 5,
+                quizAttemptsLeft: 5,
+                adsWatchedToday: 0
+            };
+        });
+
+        // History State
+        const [history, setHistory] = useState(() => {
+            const saved = localStorage.getItem('pk_user_history');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { console.error(e); }
+            }
+            return [{
+                id: 'tx_1',
+                title: 'Welcome Joining Bonus',
+                coins: 250,
+                type: 'EARNED',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'COMPLETED'
+            }];
+        });
+
+        // Sync local storage
+        useEffect(() => {
+            localStorage.setItem('pk_user_profile', JSON.stringify(user));
+        }, [user]);
+
+        useEffect(() => {
+            localStorage.setItem('pk_user_history', JSON.stringify(history));
+        }, [history]);
+
+        // Add Coins Handler
+        const addCoins = (amount, reason) => {
+            setUser(prev => ({ ...prev, coins: prev.coins + amount }));
+            setHistory(prev => [{
+                id: 'tx_' + Date.now(),
+                title: reason,
+                coins: amount,
+                type: 'EARNED',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'COMPLETED'
+            }, ...prev]);
+
+            if (window.confetti) {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.85 } });
+            }
+        };
+
+        // Redeem Handler
+        const handleRedeem = (itemTitle, itemCost, itemVal) => {
+            if (user.coins < itemCost) {
+                alert('Oops! Not enough coins to redeem this item.');
+                return;
+            }
+            const targetId = prompt('Target Account/UPI/Mobile enter karein:');
+            if (!targetId) return;
+
+            setUser(prev => ({ ...prev, coins: prev.coins - itemCost }));
+            setHistory(prev => [{
+                id: 'tx_' + Date.now(),
+                title: `Redeemed ${itemTitle}`,
+                coins: itemCost,
+                type: 'REDEEMED',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'PENDING',
+                details: `Target Account/UPI: ${targetId}`
+            }, ...prev]);
+
+            if (window.confetti) {
+                confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+            }
+            alert(`🎉 Redemption Request Placed Successfully!\n\nItem: ${itemTitle}\nDetails: ${targetId}\nYour reward will be processed within 24-48 hours by Admin!`);
+        };
+
+        // Daily Check-in Claim
+        const claimDailyBonus = () => {
+            addCoins(20, 'Daily Check-in Streak Reward');
+            alert('✅ Daily Bonus Claim Ho Gaya (+20 Coins)!');
+        };
+
+        // Ad Complete Handler
+        const handleAdComplete = () => {
+            setShowAdModal(false);
+            if (adRewardType === 'spin') {
+                setUser(p => ({ ...p, spinsLeft: p.spinsLeft + 3 }));
+                alert('🎉 You received +3 Free Spins!');
+            } else if (adRewardType === 'scratch') {
+                setUser(p => ({ ...p, scratchesLeft: p.scratchesLeft + 3 }));
+                alert('🎉 You received +3 Scratch Cards!');
+            } else if (adRewardType === 'quiz') {
+                setUser(p => ({ ...p, quizAttemptsLeft: p.quizAttemptsLeft + 3 }));
+                alert('🎉 You received +3 Quiz Chances!');
+            } else {
+                addCoins(50, 'Sponsored Ad Reward');
+            }
+        };
+
+        return (
+            <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-20 selection:bg-amber-500 selection:text-slate-950">
+                {/* Header Navbar */}
+                <header className="p-4 bg-slate-900/90 backdrop-blur border-b border-slate-800 flex justify-between items-center sticky top-0 z-50">
+                    <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-crown text-amber-400 text-xl"></i>
+                        <span className="font-bold text-amber-500 text-lg">PK KING REWARDS</span>
+                    </div>
+                    <div onClick={() => setShowAuthModal(true)} className="bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-full text-amber-400 font-bold text-sm flex items-center gap-2 cursor-pointer hover:bg-amber-500/20">
+                        <i className="fa-solid fa-coins"></i>
+                        <span>{user.coins}</span>
+                    </div>
+                </header>
+
+                {/* Main Body */}
+                <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
+                    {/* Home Tab */}
+                    {activeTab === 'home' && (
+                        <div className="space-y-6">
+                            {/* Announcement Banner */}
+                            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-orange-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-amber-500 text-slate-950 rounded-xl font-bold animate-pulse-slow">
+                                        <i className="fa-solid fa-fire text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-amber-400 text-sm sm:text-base">PK King FF Daily Loot Dhamaka!</h3>
+                                        <p className="text-xs text-slate-300">Complete tasks, play spin wheel & get Instant Google Play Codes!</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setActiveTab('games')} className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs shadow-md transition shrink-0">
+                                    Play Now
+                                </button>
+                            </div>
+
+                            {/* Quick Actions Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                                <button onClick={() => setActiveTab('games')} className="bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md">
+                                    <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl group-hover:scale-110 transition"><i className="fa-solid fa-gamepad text-xl"></i></div>
+                                    <span className="font-bold text-sm">Play & Earn</span>
+                                    <span className="text-[11px] text-slate-400">Spin, Scratch & Quiz</span>
+                                </button>
+                                <button onClick={() => setActiveTab('redeem')} className="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md">
+                                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl group-hover:scale-110 transition"><i className="fa-solid fa-gift text-xl"></i></div>
+                                    <span className="font-bold text-sm">Redeem Store</span>
+                                    <span className="text-[11px] text-slate-400">Play Codes & Diamonds</span>
+                                </button>
+                                <button onClick={() => setShowReferModal(true)} className="bg-slate-900/90 border border-slate-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md">
+                                    <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl group-hover:scale-110 transition"><i className="fa-solid fa-share-nodes text-xl"></i></div>
+                                    <span className="font-bold text-sm">Refer Friends</span>
+                                    <span className="text-[11px] text-slate-400">Earn 500 Coins/Friend</span>
+                                </button>
+                                <button onClick={() => { setAdRewardType('coins'); setShowAdModal(true); }} className="bg-slate-900/90 border border-slate-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md">
+                                    <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl group-hover:scale-110 transition"><i className="fa-solid fa-circle-play text-xl"></i></div>
+                                    <span className="font-bold text-sm">Watch Video</span>
+                                    <span className="text-[11px] text-slate-400">+50 Instant Coins</span>
+                                </button>
+                            </div>
+
+                            {/* Daily Streak Section */}
+                            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-bold text-amber-400 text-sm"><i className="fa-solid fa-calendar-check mr-2"></i>Dainik Haziri Bonus</h4>
+                                    <span className="text-xs text-slate-400">Day {user.dailyStreak}</span>
+                                </div>
+                                <div className="grid grid-cols-7 gap-1.5 text-center">
+                                    {[10, 15, 20, 25, 30, 40, 50].map((bonus, idx) => (
+                                        <div key={idx} className={`p-2 rounded-xl border text-xs ${idx === 2 ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+                                            <div className="text-[10px] mb-1">Din {idx + 1}</div>
+                                            <div className="font-bold">+{bonus}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={claimDailyBonus} className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-2.5 rounded-xl font-bold text-xs shadow-md transition">
+                                    Aapka Aaj Ka Claim Karein
+                                </button>
+                            </div>
+
+                            {/* YouTube Watch Section */}
+                            <div className="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <i className="fa-brands fa-youtube text-red-500 text-2xl"></i>
+                                        <div>
+                                            <h4 className="font-bold text-sm">PK King FF YouTube Channel</h4>
+                                            <p className="text-xs text-slate-400">Yeh YouTube channel ka link hai, aap video dekhenge har video par 10 coin milega!</p>
+                                        </div>
+                                    </div>
+                                    <span className="bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg text-xs font-bold shrink-0">+10 COIN / VISIT</span>
+                                </div>
+                                <button onClick={() => { window.open('https://youtube.com/@p.k.king.freefire', '_blank'); addCoins(10, 'YouTube Watch'); }} className="w-full bg-red-600 hover:bg-red-500 text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md transition">
+                                    <i className="fa-solid fa-play"></i> Channel Kholo aur Seekho/Dekho
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Games Tab */}
+                    {activeTab === 'games' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                        <i className="fa-solid fa-gamepad text-amber-500"></i> Free Fire Reward Games
+                                    </h2>
+                                    <p className="text-xs text-slate-400">Play exciting games and convert points directly into real rewards</p>
+                                </div>
+                                <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl text-amber-400 text-xs font-bold">
+                                    <i className="fa-solid fa-coins"></i> {user.coins} Coins
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Lucky Spin */}
+                                <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 text-center">
+                                    <h3 className="font-bold text-amber-400"><i className="fa-solid fa-arrows-spin mr-2"></i>Lucky Spin Wheel</h3>
+                                    <p className="text-xs text-slate-400">Remaining Spins Today: {user.spinsLeft}</p>
+                                    <button onClick={() => {
+                                        if (user.spinsLeft <= 0) { setAdRewardType('spin'); setShowAdModal(true); return; }
+                                        const win = Math.floor(Math.random() * 20) + 10;
+                                        setUser(p => ({ ...p, spinsLeft: p.spinsLeft - 1 }));
+                                        addCoins(win, 'Lucky Spin Reward');
+                                        alert(`🎉 Congratulations! You won +${win} Coins!`);
+                                    }} className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-3 rounded-xl font-bold text-sm shadow-md transition">
+                                        {user.spinsLeft > 0 ? 'Spin Wheel Now' : 'Get +3 Free Spins (Watch Ad)'}
+                                    </button>
+                                </div>
+
+                                {/* Scratch Card */}
+                                <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 text-center">
+                                    <h3 className="font-bold text-amber-400"><i className="fa-solid fa-box-open mr-2"></i>Gold Scratch Card</h3>
+                                    <p className="text-xs text-slate-400">Remaining Cards Today: {user.scratchesLeft}</p>
+                                    <button onClick={() => {
+                                        if (user.scratchesLeft <= 0) { setAdRewardType('scratch'); setShowAdModal(true); return; }
+                                        const win = Math.floor(Math.random() * 25) + 15;
+                                        setUser(p => ({ ...p, scratchesLeft: p.scratchesLeft - 1 }));
+                                        addCoins(win, 'Gold Scratch Card Reward');
+                                        alert(`🎰 Scratch Success! You won +${win} Coins!`);
+                                    }} className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-3 rounded-xl font-bold text-sm shadow-md transition">
+                                        {user.scratchesLeft > 0 ? 'Scratch Card Now' : 'Get +3 Free Cards (Watch Ad)'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Redeem Tab */}
+                    {activeTab === 'redeem' && (
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-bold text-amber-500 flex items-center gap-2 border-b border-slate-800 pb-3">
+                                <i className="fa-solid fa-store"></i> Redeem Rewards Store
+                            </h2>
+
+                            {/* Store Items */}
+                            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-red-500/10 text-red-400 rounded-xl"><i className="fa-brands fa-google-play text-2xl"></i></div>
+                                    <div>
+                                        <h4 className="font-bold text-sm">Google Play Code ₹10</h4>
+                                        <p className="text-xs text-slate-400">15,000 Coins Required</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => handleRedeem('Google Play Code ₹10', 15000, 'GOOGLE_PLAY')} className="bg-amber-500 hover:bg-amber-400 text-
