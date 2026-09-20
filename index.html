@@ -1,0 +1,352 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Sparkles, 
+  Gamepad2, 
+  Flame, 
+  Gift, 
+  Trophy, 
+  TrendingUp, 
+  ShieldCheck, 
+  Coins, 
+  Share2, 
+  History,
+  HelpCircle,
+  Bell,
+  CheckCircle2
+} from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { UserProfile, RewardTransaction, RedeemItem } from './types';
+import Navbar from './components/Navbar';
+import SpinWheel from './components/SpinWheel';
+import ScratchCard from './components/ScratchCard';
+import MathQuiz from './components/MathQuiz';
+import DailyCheckIn from './components/DailyCheckIn';
+import RedeemStore from './components/RedeemStore';
+import HistoryView from './components/HistoryView';
+import ReferEarnModal from './components/ReferEarnModal';
+import GoogleAuthModal from './components/GoogleAuthModal';
+import AdminPanel from './components/AdminPanel';
+import YouTubeWatchSection from './components/YouTubeWatchSection';
+import ShortAdModal from './components/ShortAdModal';
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState<'home' | 'games' | 'redeem' | 'history' | 'admin'>('home');
+  const [showReferModal, setShowReferModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [adRewardType, setAdRewardType] = useState<'spin' | 'scratch' | 'quiz' | 'coins'>('coins');
+
+  // User State
+  const [user, setUser] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem('pk_user_profile');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return {
+      id: 'PK_' + Math.floor(100000 + Math.random() * 900000),
+      name: 'FF Warrior',
+      email: 'asharphibharati@gmail.com',
+      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150',
+      coins: 250,
+      referralCode: 'PKKING99',
+      joinedDate: new Date().toLocaleDateString(),
+      dailyStreak: 1,
+      spinsLeft: 5,
+      scratchesLeft: 5,
+      quizAttemptsLeft: 5,
+      adsWatchedToday: 0
+    };
+  });
+
+  const [history, setHistory] = useState<RewardTransaction[]>(() => {
+    const saved = localStorage.getItem('pk_user_history');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return [
+      {
+        id: 'tx_1',
+        title: 'Welcome Joining Bonus',
+        coins: 250,
+        type: 'EARNED',
+        timestamp: new Date().toLocaleString(),
+        status: 'COMPLETED'
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pk_user_profile', JSON.stringify(user));
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem('pk_user_history', JSON.stringify(history));
+  }, [history]);
+
+  const addCoins = (amount: number, reason: string) => {
+    setUser(prev => ({ ...prev, coins: prev.coins + amount }));
+    setHistory(prev => [
+      {
+        id: 'tx_' + Date.now(),
+        title: reason,
+        coins: amount,
+        type: 'EARNED',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'COMPLETED'
+      },
+      ...prev
+    ]);
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.85 }
+    });
+  };
+
+  const handleRedeem = (item: RedeemItem, targetId: string) => {
+    if (user.coins < item.costCoins) {
+      alert("Oops! Not enough coins to redeem this item.");
+      return;
+    }
+
+    setUser(prev => ({ ...prev, coins: prev.coins - item.costCoins }));
+    setHistory(prev => [
+      {
+        id: 'tx_' + Date.now(),
+        title: `Redeemed ${item.title} (${item.amountValue})`,
+        coins: item.costCoins,
+        type: 'REDEEMED',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'PENDING',
+        details: `Target Account/UPI: ${targetId}`
+      },
+      ...prev
+    ]);
+
+    confetti({
+      particleCount: 120,
+      spread: 90,
+      origin: { y: 0.6 }
+    });
+
+    alert(`ðŸŽ‰ Redemption Request Placed Successfully!\n\nItem: ${item.title}\nDetails: ${targetId}\n\nYour reward will be processed within 24-48 hours by Admin!`);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-20 selection:bg-amber-500 selection:text-slate-950">
+      {/* Top Header */}
+      <Navbar 
+        user={user} 
+        onOpenAuth={() => setShowAuthModal(true)} 
+        onOpenRefer={() => setShowReferModal(true)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {/* Main Content Areas */}
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
+        {activeTab === 'home' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Announcement Banner */}
+            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-orange-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500 text-slate-950 rounded-xl font-bold">
+                  <Flame className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-amber-400 text-sm sm:text-base">PK King FF Daily Loot Dhamaka!</h3>
+                  <p className="text-xs text-slate-300">Complete tasks, play spin wheel & get Instant Google Play Codes!</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveTab('games')}
+                className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-xl font-bold text-xs shadow-md transition shrink-0"
+              >
+                Play Now
+              </button>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <button 
+                onClick={() => setActiveTab('games')}
+                className="bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md"
+              >
+                <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl group-hover:scale-110 transition">
+                  <Gamepad2 className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-sm">Play & Earn</span>
+                <span className="text-[11px] text-slate-400">Spin, Scratch & Quiz</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('redeem')}
+                className="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md"
+              >
+                <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl group-hover:scale-110 transition">
+                  <Gift className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-sm">Redeem Store</span>
+                <span className="text-[11px] text-slate-400">Play Codes & Diamonds</span>
+              </button>
+
+              <button 
+                onClick={() => setShowReferModal(true)}
+                className="bg-slate-900/90 border border-slate-800 hover:border-blue-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md"
+              >
+                <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl group-hover:scale-110 transition">
+                  <Share2 className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-sm">Refer Friends</span>
+                <span className="text-[11px] text-slate-400">Earn 500 Coins/Friend</span>
+              </button>
+
+              <button 
+                onClick={() => {
+                  setAdRewardType('coins');
+                  setShowAdModal(true);
+                }}
+                className="bg-slate-900/90 border border-slate-800 hover:border-purple-500/50 p-4 rounded-2xl flex flex-col items-center gap-2 group transition shadow-md"
+              >
+                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl group-hover:scale-110 transition">
+                  <Coins className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-sm">Watch Video</span>
+                <span className="text-[11px] text-slate-400">+50 Instant Coins</span>
+              </button>
+            </div>
+
+            {/* Daily Streak & Check-in */}
+            <DailyCheckIn 
+              user={user} 
+              onClaimBonus={(amount) => addCoins(amount, 'Daily Check-in Streak Reward')}
+            />
+
+            {/* YouTube Watch Section */}
+            <YouTubeWatchSection 
+              onRewardEarned={(amount, title) => addCoins(amount, `Watched: ${title}`)} 
+            />
+          </div>
+        )}
+
+        {/* Games Section */}
+        {activeTab === 'games' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                  <Gamepad2 className="w-6 h-6 text-amber-500" />
+                  Free Fire Reward Games
+                </h2>
+                <p className="text-xs text-slate-400">Play exciting games and convert points directly into real rewards</p>
+              </div>
+              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl">
+                <Coins className="w-4 h-4 text-amber-400" />
+                <span className="font-bold text-amber-400 text-sm">{user.coins} Coins</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SpinWheel 
+                spinsLeft={user.spinsLeft} 
+                onSpinComplete={(amount) => {
+                  setUser(prev => ({ ...prev, spinsLeft: Math.max(0, prev.spinsLeft - 1) }));
+                  addCoins(amount, 'Lucky Spin Reward');
+                }}
+                onRequestMoreSpins={() => {
+                  setAdRewardType('spin');
+                  setShowAdModal(true);
+                }}
+              />
+
+              <ScratchCard 
+                scratchesLeft={user.scratchesLeft}
+                onScratchComplete={(amount) => {
+                  setUser(prev => ({ ...prev, scratchesLeft: Math.max(0, prev.scratchesLeft - 1) }));
+                  addCoins(amount, 'Gold Scratch Card Reward');
+                }}
+                onRequestMoreCards={() => {
+                  setAdRewardType('scratch');
+                  setShowAdModal(true);
+                }}
+              />
+            </div>
+
+            <MathQuiz 
+              attemptsLeft={user.quizAttemptsLeft}
+              onQuizSuccess={(amount) => {
+                setUser(prev => ({ ...prev, quizAttemptsLeft: Math.max(0, prev.quizAttemptsLeft - 1) }));
+                addCoins(amount, 'FF Math Quiz Master');
+              }}
+              onRequestMoreQuiz={() => {
+                setAdRewardType('quiz');
+                setShowAdModal(true);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Redeem Section */}
+        {activeTab === 'redeem' && (
+          <RedeemStore 
+            userCoins={user.coins} 
+            onRedeem={handleRedeem} 
+          />
+        )}
+
+        {/* History Section */}
+        {activeTab === 'history' && (
+          <HistoryView history={history} />
+        )}
+
+        {/* Admin Panel */}
+        {activeTab === 'admin' && (
+          <AdminPanel 
+            history={history}
+            onUpdateStatus={(id, newStatus) => {
+              setHistory(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
+            }}
+          />
+        )}
+      </main>
+
+      {/* Modals */}
+      {showReferModal && (
+        <ReferEarnModal 
+          user={user} 
+          onClose={() => setShowReferModal(false)} 
+        />
+      )}
+
+      {showAuthModal && (
+        <GoogleAuthModal 
+          user={user}
+          onUpdateUser={(updated) => setUser(prev => ({ ...prev, ...updated }))}
+          onClose={() => setShowAuthModal(false)}
+        />
+      )}
+
+      {showAdModal && (
+        <ShortAdModal 
+          rewardType={adRewardType}
+          onCompleted={() => {
+            if (adRewardType === 'spin') {
+              setUser(p => ({ ...p, spinsLeft: p.spinsLeft + 3 }));
+              alert("ðŸŽ‰ You received +3 Free Spins!");
+            } else if (adRewardType === 'scratch') {
+              setUser(p => ({ ...p, scratchesLeft: p.scratchesLeft + 3 }));
+              alert("ðŸŽ‰ You received +3 Scratch Cards!");
+            } else if (adRewardType === 'quiz') {
+              setUser(p => ({ ...p, quizAttemptsLeft: p.quizAttemptsLeft + 3 }));
+              alert("ðŸŽ‰ You received +3 Quiz Chances!");
+            } else {
+              addCoins(50, 'Sponsored Ad Reward');
+            }
+            setShowAdModal(false);
+          }}
+          onClose={() => setShowAdModal(false)}
+        />
+      )}
+    </div>
+  );
+}
