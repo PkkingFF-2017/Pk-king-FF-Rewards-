@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#08090d">
+<title>PK King FF Rewards</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#08090d;color:#fff;
+ font-family:Arial,sans-serif;
+}
+header{
+ position:sticky;top:0;z-index:5;
+ padding:17px;
+ background:linear-gradient(135deg,#17130a,#090a0f);
+ border-bottom:1px solid #302718;
+}
+.logo{font-size:23px;font-weight:800;color:#ffd54a}
+.sub{font-size:12px;color:#aaa;margin-top:4px}
+
+.container{
+ max-width:900px;margin:auto;
+ padding:16px 15px 90px;
+}
+
+section{display:none}
+.active{display:block}
+
+.balance{
+ background:linear-gradient(135deg,#30250d,#151008);
+ border:1px solid #9a7418;
+ border-radius:20px;
+ padding:20px;
+ margin-bottom:15px;
+}
+.balance small{color:#c9bd99}
+.coins{
+ font-size:34px;
+ font-weight:800;
+ color:#ffd54a;
+ margin:6px 0;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:12px;
+}
+.card,.item{
+ background:#12151c;
+ border:1px solid #282d37;
+ border-radius:17px;
+ padding:16px;
+}
+.card h3{margin:0 0 8px}
+.muted{
+ color:#999;
+ font-size:13px;
+ line-height:1.5;
+}
+.reward{
+ color:#ffd54a;
+ font-size:22px;
+ font-weight:800;
+}
+
+button{
+ border:0;
+ border-radius:11px;
+ padding:11px 15px;
+ background:#ffd54a;
+ color:#111;
+ font-weight:800;
+ cursor:pointer;
+}
+button.secondary{
+ background:#272b34;
+ color:#fff;
+}
+button.full{width:100%}
+
+.list{
+ display:flex;
+ flex-direction:column;
+ gap:10px;
+}
+
+.tag{
+ display:inline-block;
+ background:#282216;
+ color:#ffd54a;
+ border-radius:20px;
+ padding:5px 9px;
+ font-size:10px;
+ margin-bottom:8px;
+}
+
+input,select{
+ width:100%;
+ padding:12px;
+ margin:6px 0;
+ border-radius:10px;
+ border:1px solid #353a46;
+ background:#0b0d12;
+ color:white;
+}
+
+.notice{
+ background:#171a22;
+ border-left:3px solid #ffd54a;
+ padding:12px;
+ border-radius:8px;
+ color:#bbb;
+ font-size:12px;
+ margin:12px 0;
+}
+
+nav{
+ position:fixed;
+ bottom:0;left:0;right:0;
+ background:#11131a;
+ border-top:1px solid #292d36;
+ display:flex;
+ justify-content:center;
+ z-index:10;
+ overflow:auto;
+}
+nav button{
+ background:none;
+ color:#999;
+ border-radius:0;
+ padding:12px 14px;
+ font-size:11px;
+ min-width:65px;
+}
+nav button.navActive{color:#ffd54a}
+
+.modal{
+ position:fixed;
+ inset:0;
+ background:#000c;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+ z-index:20;
+}
+.modalBox{
+ width:100%;
+ max-width:430px;
+ background:#151820;
+ border:1px solid #3b404c;
+ border-radius:18px;
+ padding:20px;
+}
+
+@media(max-width:600px){
+ .grid{grid-template-columns:1fr 1fr}
+ .coins{font-size:29px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">👑 PK King FF Rewards</div>
+ <div class="sub">Rewards • Games • Redeem</div>
+</header>
+
+<div class="container">
+
+<!-- HOME -->
+<section id="home" class="active">
+
+ <div class="balance">
+  <small>Your Balance</small>
+  <div class="coins" id="coins">30,000 🪙</div>
+  <small>1,500 coins = ₹1</small>
+ </div>
+
+ <div class="grid">
+
+  <div class="card">
+   <div class="tag">DAILY</div>
+   <h3>🎡 Lucky Spin</h3>
+   <div class="reward">5–50</div>
+   <p class="muted">5 free spins every day.</p>
+   <button onclick="spin()">SPIN</button>
+  </div>
+
+  <div class="card">
+   <div class="tag">DAILY</div>
+   <h3>🎫 Gold Scratch</h3>
+   <div class="reward">10–15</div>
+   <p class="muted">5 free scratches every day.</p>
+   <button onclick="scratch()">SCRATCH</button>
+  </div>
+
+  <div class="card">
+   <div class="tag">STREAK</div>
+   <h3>🔥 7-Day Streak</h3>
+   <p class="muted">
+    10 → 15 → 20 → 25 → 30 → 35 → 40
+   </p>
+   <button onclick="claimStreak()">CLAIM</button>
+  </div>
+
+  <div class="card">
+   <div class="tag">QUIZ</div>
+   <h3>🧠 Gaming Quiz</h3>
+   <p class="muted">15-second quiz. Correct = 20 coins.</p>
+   <button onclick="quiz()">START</button>
+  </div>
+
+ </div>
+
+ <div class="card" style="margin-top:12px">
+  <h3>📺 PK King FF YouTube</h3>
+  <p class="muted">
+   YouTube channel visit karo normally.
+   Artificial views, likes ya subscriptions ke badle rewards nahi diye jayenge.
+  </p>
+  <button onclick="window.open('https://www.youtube.com/','_blank')">
+   OPEN YOUTUBE
+  </button>
+ </div>
+
+</section>
+
+
+<!-- GAMES -->
+<section id="games">
+
+<h2>🎮 Games & Rewards</h2>
+
+<div class="list">
+
+ <div class="item">
+  <b>🎡 Lucky Spin</b>
+  <p class="muted">
+   5 free daily spins. Rewards: 5, 10, 15, 20, 25, 30, 50.
+  </p>
+  <button onclick="spin()">SPIN NOW</button>
+ </div>
+
+ <div class="item">
+  <b>🎫 Gold Scratch</b>
+  <p class="muted">
+   5 free daily scratches. Reward: 10–15 coins.
+  </p>
+  <button onclick="scratch()">SCRATCH NOW</button>
+ </div>
+
+ <div class="item">
+  <b>🔥 7-Day Streak</b>
+  <p class="muted">
+   Day rewards: 10, 15, 20, 25, 30, 35, 40.
+  </p>
+  <button onclick="claimStreak()">CLAIM TODAY</button>
+ </div>
+
+ <div class="item">
+  <b>🧠 Gaming Quiz</b>
+  <p class="muted">
+   Correct answer gives 20 coins.
+  </p>
+  <button onclick="quiz()">PLAY QUIZ</button>
+ </div>
+
+</div>
+</section>
+
+
+<!-- REDEEM -->
+<section id="redeem">
+
+<h2>🎁 Redeem</h2>
+
+<div class="notice">
+ Redeem request submit hone ke baad admin manually review karega.
+ Real redeem codes public HTML/JavaScript me store nahi kiye jayenge.
+</div>
+
+<div class="grid">
+
+ <div class="card">
+  <h3>🎮 Google Play</h3>
+  <p class="muted">
+   ₹10 = 15,000<br>
+   ₹30 = 30,000<br>
+   ₹50 = 75,000<br>
+   ₹100 = 130,000
+  </p>
+  <button onclick="openRedeem('Google Play')">REDEEM</button>
+ </div>
+
+ <div class="card">
+  <h3>🔥 Free Fire</h3>
+  <p class="muted">
+   Free Fire redemption request.
+  </p>
+  <button onclick="openRedeem('Free Fire Diamonds')">
+   REDEEM
+  </button>
+ </div>
+
+ <div class="card">
+  <h3>💸 UPI Cash</h3>
+  <p class="muted">
+   ₹10 = 15,000<br>
+   ₹50 = 75,000<br>
+   ₹100 = 130,000
+  </p>
+  <button onclick="openRedeem('UPI Cash')">REDEEM</button>
+ </div>
+
+ <div class="card">
+  <h3>🎁 Weekly Membership</h3>
+  <p class="muted">16,000 coins</p>
+  <button onclick="openRedeem('Weekly Membership')">
+   REDEEM
+  </button>
+ </div>
+
+</div>
+</section>
+
+
+<!-- HISTORY -->
+<section id="history">
+
+<h2>📜 Transaction History</h2>
+
+<div id="historyList" class="list"></div>
+
+</section>
+
+
+<!-- PROFILE -->
+<section id="profile">
+
+<h2>👤 Profile</h2>
+
+<div class="card">
+ <h3>PK King FF User</h3>
+ <p class="muted">
+  Demo account data is stored on this device.
+ </p>
+</div>
+
+<div class="card" style="margin-top:12px">
+ <h3>👥 Referral</h3>
+ <p class="muted">
+  Inviter: 100 coins<br>
+  New user: 10 coins
+ </p>
+
+ <input id="refCode" placeholder="Enter referral code">
+
+ <button onclick="claimReferral()">
+  CLAIM 10 COINS
+ </button>
+</div>
+
+<div class="card" style="margin-top:12px">
+ <h3>🔐 Google Login</h3>
+ <p class="muted">
+  Real Google login ke liye Firebase Authentication connect karna hoga.
+ </p>
+ <button class="secondary"
+ onclick="alert('Firebase Authentication ko backend ke saath connect karna hoga.')">
+ CONNECT
+ </button>
+</div>
+
+</section>
+
+
+<!-- ADMIN -->
+<section id="admin">
+
+<h2>🛠️ Admin Dashboard</h2>
+
+<div class="notice">
+ Ye public HTML demo admin UI hai.
+ Real admin security ke liye Firebase Authentication + Firestore/Cloud Functions use karo.
+</div>
+
+<div class="card">
+ <h3>🪙 Balance Control</h3>
+
+ <input
+  id="adminAmount"
+  type="number"
+  placeholder="Coins">
+
+ <button onclick="adminAdd()">ADD COINS</button>
+
+ <button
+  class="secondary"
+  onclick="adminRemove()">
+  REMOVE
+ </button>
+</div>
+
+<div class="card" style="margin-top:12px">
+ <h3>🎁 Redeem Requests</h3>
+ <div id="requestsList" class="list"></div>
+</div>
+
+</section>
+
+</div>
+
+
+<!-- NAVIGATION -->
+<nav>
+
+<button class="navActive"
+ onclick="showSection('home',this)">
+ 🏠<br>Home
+</button>
+
+<button onclick="showSection('games',this)">
+ 🎮<br>Games
+</button>
+
+<button onclick="showSection('redeem',this)">
+ 🎁<br>Redeem
+</button>
+
+<button onclick="showSection('history',this)">
+ 📜<br>History
+</button>
+
+<button onclick="showSection('profile',this)">
+ 👤<br>Profile
+</button>
+
+<button onclick="showSection('admin',this)">
+ 🛠️<br>Admin
+</button>
+
+</nav>
+
+
+<!-- REDEEM MODAL -->
+<div id="redeemModal" class="modal">
+
+<div class="modalBox">
+
+<h2 id="redeemTitle">Redeem</h2>
+
+<input
+ id="redeemAmount"
+ placeholder="Amount / option">
+
+<input
+ id="redeemDetails"
+ placeholder="Email / Free Fire UID / UPI ID">
+
+<button
+ class="full"
+ onclick="submitRedeem()">
+ SUBMIT REQUEST
+</button>
+
+<button
+ class="secondary full"
+ style="margin-top:8px"
+ onclick="closeRedeem()">
+ CANCEL
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* ==============================
+   DATA
+================================ */
+
+const STORAGE_KEY="pkking_rewards_data";
+
+let data=JSON.parse(
+ localStorage.getItem(STORAGE_KEY)
+)||{
+ coins:30000,
+ spin:5,
+ scratch:5,
+ streak:0,
+ referral:false,
+ history:[],
+ requests:[]
+};
+
+
+/* ==============================
+   SAVE
+================================ */
+
+function save(){
+ localStorage.setItem(
+  STORAGE_KEY,
+  JSON.stringify(data)
+ );
+
+ render();
+}
+
+
+/* ==============================
+   RENDER
+================================ */
+
+function render(){
+
+ document.getElementById("coins")
+ .textContent=
+ data.coins.toLocaleString()+" 🪙";
+
+
+ const history=document
+ .getElementById("historyList");
+
+ if(data.history.length===0){
+
+  history.innerHTML=
+   '<div class="item muted">No transactions yet.</div>';
+
+ }else{
+
+  history.innerHTML=
+   data.history
+   .slice()
+   .reverse()
+   .map(x=>'<div class="item">'+x+'</div>')
+   .join("");
+ }
+
+
+ const requests=document
+ .getElementById("requestsList");
+
+ if(data.requests.length===0){
+
+  requests.innerHTML=
+   '<div class="muted">No redeem requests.</div>';
+
+ }else{
+
+  requests.innerHTML=
+   data.requests
+   .slice()
+   .reverse()
+   .map(x=>`
+    <div class="item">
+     <b>${x.type}</b><br>
+     Amount: ${x.amount}<br>
+     Details: ${x.details}<br>
+     <span class="muted">${x.status}</span>
+    </div>
+   `)
+   .join("");
+ }
+
+}
+
+
+/* ==============================
+   ADD COINS
+================================ */
+
+function addCoins(amount,reason){
+
+ data.coins+=amount;
+
+ data.history.push(
+  "🪙 +"+amount+
+  " coins — "+reason
+ );
+
+ save();
+}
+
+
+/* ==============================
+   SPIN
+================================ */
+
+function spin(){
+
+ if(data.spin<=0){
+
+  alert("Aaj ke 5 free spins use ho chuke hain.");
+
+  return;
+ }
+
+ const rewards=[
+  5,10,15,20,25,30,50
+ ];
+
+ const reward=
+  rewards[
+   Math.floor(
+    Math.random()*rewards.length
+   )
+  ];
+
+ data.spin--;
+
+ addCoins(
+  reward,
+  "Lucky Spin"
+ );
+
+ alert(
+  "🎉 Congratulations! "+
+  reward+
+  " coins mile."
+ );
+
+}
+
+
+/* ==============================
+   SCRATCH
+================================ */
+
+function scratch(){
+
+ if(data.scratch<=0){
+
+  alert(
+   "Aaj ke 5 free scratches use ho chuke hain."
+  );
+
+  return;
+ }
+
+ const reward=
+  10+
+  Math.floor(
+   Math.random()*6
+  );
+
+ data.scratch--;
+
+ addCoins(
+  reward,
+  "Gold Scratch"
+ );
+
+ alert(
+  "🎉 Scratch reward: "+
+  reward+
+  " coins"
+ );
+
+}
+
+
+/* ==============================
+   STREAK
+================================ */
+
+function claimStreak(){
+
+ const rewards=[
+  10,15,20,25,30,35,40
+ ];
+
+ const day=
+  data.streak%7;
+
+ const reward=
+  rewards[day];
+
+ data.streak++;
+
+ addCoins(
+  reward,
+  "Day "+(day+1)+" Streak"
+ );
+
+ alert(
+  "🔥 Day "+
+  (day+1)+
+  " streak reward: "+
+  reward+
+  " coins"
+ );
+
+}
+
+
+/* ==============================
+   QUIZ
+================================ */
+
+function quiz(){
+
+ const answer=confirm(
+  "Gaming Quiz\n\n"+
+  "Free Fire me Gloo Wall ka main use kya hai?\n\n"+
+  "OK = Cover / Protection\n"+
+  "Cancel = Vehicle"
+ );
+
+ if(answer){
+
+  addCoins(
+   20,
+   "Gaming Quiz correct"
+  );
+
+  alert(
+   "✅ Correct answer! +20 coins"
+  );
+
+ }else{
+
+  alert(
+   "❌ Wrong answer."
+  );
+
+ }
+
+}
+
+
+/* ==============================
+   REDEEM
+================================ */
+
+let redeemType="";
+
+
+function openRedeem(type){
+
+ redeemType=type;
+
+ document
+ .getElementById("redeemTitle")
+ .textContent=
+ "Redeem — "+type;
+
+ document
+ .getElementById("redeemAmount")
+ .value="";
+
+ document
+ .getElementById("redeemDetails")
+ .value="";
+
+ document
+ .getElementById("redeemModal")
+ .style.display="flex";
+}
+
+
+function closeRedeem(){
+
+ document
+ .getElementById("redeemModal")
+ .style.display="none";
+
+}
+
+
+function submitRedeem(){
+
+ const amount=
+  document
+  .getElementById("redeemAmount")
+  .value
+  .trim();
+
+ const details=
+  document
+  .getElementById("redeemDetails")
+  .value
+  .trim();
+
+ if(!amount||!details){
+
+  alert(
+   "Amount aur required details fill karo."
+  );
+
+  return;
+ }
+
+ data.requests.push({
+
+  type:redeemType,
+
+  amount:amount,
+
+  details:details,
+
+  status:"Pending — Admin Review"
+
+ });
+
+ data.history.push(
+  "🎁 Redeem request — "+
+  redeemType+
+  " — Pending"
+ );
+
+ save();
+
+ closeRedeem();
+
+ alert(
+  "✅ Redeem request submit ho gayi."
+ );
+
+}
+
+
+/* ==============================
+   REFERRAL
+================================ */
+
+function claimReferral(){
+
+ if(data.referral){
+
+  alert(
+   "Referral bonus already claimed."
+  );
+
+  return;
+ }
+
+ const code=
+  document
+  .getElementById("refCode")
+  .value
+  .trim();
+
+ if(!code){
+
+  alert(
+   "Referral code enter karo."
+  );
+
+  return;
+ }
+
+ data.referral=true;
+
+ addCoins(
+  10,
+  "New User Referral Bonus"
+ );
+
+ alert(
+  "🎉 Referral bonus +10 coins"
+ );
+
+}
+
+
+/* ==============================
+   ADMIN DEMO
+================================ */
+
+function adminAdd(){
+
+ const amount=
+  Number(
+   document
+   .getElementById("adminAmount")
+   .value
+  );
+
+ if(amount<=0){
+
+  alert("Valid coin amount enter karo.");
+
+  return;
+ }
+
+ addCoins(
+  amount,
+  "Admin Adjustment"
+ );
+
+}
+
+
+function adminRemove(){
+
+ const amount=
+  Number(
+   document
+   .getElementById("adminAmount")
+   .value
+  );
+
+ if(amount<=0){
+
+  alert("Valid coin amount enter karo.");
+
+  return;
+ }
+
+ data.coins=
+  Math.max(
+   0,
+   data.coins-amount
+  );
+
+ data.history.push(
+  "🪙 -"+
+  amount+
+  " coins — Admin Adjustment"
+ );
+
+ save();
+
+}
+
+
+/* ==============================
+   NAVIGATION
+================================ */
+
+function showSection(id,button){
+
+ document
+ .querySelectorAll("section")
+ .forEach(
+  section=>
+   section.classList.remove("active")
+ );
+
+ document
+ .getElementById(id)
+ .classList.add("active");
+
+ document
+ .querySelectorAll("nav button")
+ .forEach(
+  b=>b.classList.remove("navActive")
+ );
+
+ button.classList.add("navActive");
+
+ window.scrollTo({
+  top:0,
+  behavior:"smooth"
+ });
+
+}
+
+
+/* ==============================
+   START
+================================ */
+
+render();
+
+</script>
+
+</body>
+</html>
